@@ -11,7 +11,7 @@ cust_data_backup<-cust_data
 cust_data[1:6,1:6]
 str(cust_data)
 #removing unuseful columns
-cust_data_subset<-cust_data[,-c("custid","age","birthmonth","ed","employ","income","lninc","creddebt","othdebt","spoused"
+cust_data_subset<-cust_data[,-c("custid","age","birthmonth","ed","employ","income","lninc","lncreddebt","lnothdebt","spoused"
                                 ,"pets_cats","pets_dogs","pets_birds","pets_reptiles","pets_small","pets_saltfish","pets_freshfish"
                                 ,"address","carvalue","commute","commutetime","commutecar","commutecarpool","commutemotorcycle","commutecarpool"
                                 ,"commutebus","commuterail","commutepublic","commutebike","commutewalk","commutenonmotor"
@@ -19,12 +19,12 @@ cust_data_subset<-cust_data[,-c("custid","age","birthmonth","ed","employ","incom
                                 ,"lnequipten","lncardmon","lncardten","lnwiremon","lnwireten"
                           )]
 #separating columns according to factors and numeric ones
-cust_cat<-cust_data_subset[,-c("debtinc","lncreddebt","lnothdebt","reside","pets"
+cust_cat<-cust_data_subset[,-c("debtinc","reside","pets","creddebt","othdebt"
                                ,"cars","carditems","card2items","card2spent","cardspent",
                                "tenure","longmon","longten","tollmon","tollten","equipmon","equipten",
                                "cardmon","cardten","wiremon","wireten","hourstv")]
 
-cust_num<-cust_data_subset[,c("debtinc","lncreddebt","lnothdebt","reside","pets"
+cust_num<-cust_data_subset[,c("debtinc","reside","pets","creddebt","othdebt"
                               ,"cars","carditems","card2items","card2spent","cardspent",
                               "tenure","longmon","longten","tollmon","tollten","equipmon","equipten",
                               "cardmon","cardten","wiremon","wireten","hourstv")]
@@ -59,3 +59,12 @@ na.values
 #combining card 1 spent and card 2 spent
 cust_data_sub$total_cardspent<-cust_data_sub$cardspent+cust_data_sub$card2spent
 head(cust_data_sub[,c("cardspent","card2spent","total_cardspent")])
+cust_data_sub<-cust_data_sub[complete.cases(cust_data_sub)]
+#plotting for correlation
+
+install.packages("corrgram")
+library("corrgram")
+install.packages("corrplot")
+library("corrplot")
+temp.cor<-cor(cust_data_sub[,c(1:22,85)])
+corrplot(temp.cor,method = "pie")
