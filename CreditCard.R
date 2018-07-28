@@ -29,23 +29,33 @@ cust_num<-cust_data_subset[,c("debtinc","lncreddebt","lnothdebt","reside","pets"
                               "tenure","longmon","longten","tollmon","tollten","equipmon","equipten",
                               "cardmon","cardten","wiremon","wireten","hourstv")]
 
-
-
-
 #converting into factor
 cust_cat[,1:62]<-lapply(cust_cat[,1:62],as.character)
 cust_cat[,1:62]<-lapply(cust_cat[,1:62],as.factor)
 str(cust_cat)
 str(cust_num)
+
 #combining again into one dataset
 cust_data_sub<-cbind(cust_num,cust_cat)
 str(cust_data_sub)
 summary(cust_data_sub)
+
 #checking for NAs
-View(cust_data_sub[!complete.cases(cust_data_sub)])
-#reordering columns
+na.values<-View(cust_data_sub[!complete.cases(cust_data_sub)])
+
+#reordering columns(not working)
 col_names<-names(cust_data_subset)
 class(cust_data_subset)
 cust_data_sub<-cust_data_sub[,col_names]
 
+#removing NAs for townsize
+mean_reg_twn_1<-as.numeric(cust_data%>%filter(region=="1")%>%select(townsize)%>%summarize(mn=ceiling(median(townsize,na.rm=T))))
+cust_data_sub[cust_data_sub$region=="1" & is.na(cust_data_sub$townsize),"townsize"]<-as.factor(mean_reg_twn_1)
 
+mean_reg_twn_5<-as.numeric(cust_data%>%filter(region=="5")%>%select(townsize)%>%summarize(mn=ceiling(median(townsize,na.rm=T))))
+cust_data_sub[cust_data_sub$region=="5" & is.na(cust_data_sub$townsize),"townsize"]<-as.factor(mean_reg_twn_5)
+
+na.values 
+#combining card 1 spent and card 2 spent
+cust_data_sub$total_cardspent<-cust_data_sub$cardspent+cust_data_sub$card2spent
+head(cust_data_sub[,c("cardspent","card2spent","total_cardspent")])
