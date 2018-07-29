@@ -1,4 +1,7 @@
 #loading libraries
+
+library("corrgram")
+library("corrplot")
 library(dplyr)
 library(ggplot2)
 library(caTools)
@@ -54,17 +57,45 @@ cust_data_sub[cust_data_sub$region=="1" & is.na(cust_data_sub$townsize),"townsiz
 
 mean_reg_twn_5<-as.numeric(cust_data%>%filter(region=="5")%>%select(townsize)%>%summarize(mn=ceiling(median(townsize,na.rm=T))))
 cust_data_sub[cust_data_sub$region=="5" & is.na(cust_data_sub$townsize),"townsize"]<-as.factor(mean_reg_twn_5)
+View(cust_data_sub[complete.cases(cust_data_sub)])
 
-na.values 
 #combining card 1 spent and card 2 spent
 cust_data_sub$total_cardspent<-cust_data_sub$cardspent+cust_data_sub$card2spent
 head(cust_data_sub[,c("cardspent","card2spent","total_cardspent")])
 cust_data_sub<-cust_data_sub[complete.cases(cust_data_sub)]
 #plotting for correlation
-
-install.packages("corrgram")
-library("corrgram")
-install.packages("corrplot")
-library("corrplot")
-temp.cor<-cor(cust_data_sub[,c(1:22,85)])
+temp.cor<-cor(cust_data_sub[,c(85,1:22)])
 corrplot(temp.cor,method = "pie")
+
+#outliers
+p<-ggplot(data=cust_data_sub)
+p1<-p+geom_point(aes(x=debtinc,y=total_cardspent))
+p1
+
+#3SD
+cust_cat2<-cust_data_sub[,-c("debtinc","reside","pets","creddebt","othdebt"
+                               ,"cars","carditems","card2items","card2spent","cardspent",
+                               "tenure","longmon","longten","tollmon","tollten","equipmon","equipten",
+                               "cardmon","cardten","wiremon","wireten","hourstv")]
+
+cust_num2<-cust_data_sub[,c("debtinc","reside","pets","creddebt","othdebt"
+                              ,"cars","carditems","card2items","card2spent","cardspent",
+                              "tenure","longmon","longten","tollmon","tollten","equipmon","equipten",
+                              "cardmon","cardten","wiremon","wireten","hourstv")]
+
+cust_num2<-as.data.frame(apply(cust_num2,2,function(x)
+{med<-median(x)
+std<-sd(x)
+sapply(x,function(y)
+{
+  if(y< med-(3*std))
+  {y<-round(med-(3*std),2)}
+  else if(y> med+(3*std))
+  {y<-med+round((3*std),2)}
+  else{y<-round(y,2)}
+})
+
+}))
+
+View(cust_num2[complete.cases(cust_num2)])
+final_sub<-cbind(cust_num2,cust_cat2)
