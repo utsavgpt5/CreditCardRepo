@@ -47,9 +47,10 @@ summary(cust_data_sub)
 View(cust_data_sub[!complete.cases(cust_data_sub)])
 
 #reordering columns(not working)
-col_names<-names(cust_data_subset)
-class(cust_data_subset)
-cust_data_sub<-cust_data_sub[,col_names]
+#col_names<-names(cust_data_subset)
+#class(cust_data_subset)
+
+#cust_data_sub<-cust_data_sub[,col_names]
 
 #removing NAs for townsize
 mean_reg_twn_1<-as.numeric(cust_data%>%filter(region=="1")%>%select(townsize)%>%summarize(mn=ceiling(median(townsize,na.rm=T))))
@@ -105,7 +106,7 @@ corrplot(temp.cor,method = "color")
 final_sub1<-final_sub
 
 #removing more columns
-final_sub<-final_sub[,c("total_cardspent", "creddebt","othdebt","carditems","card2items",
+final_sub<-final_sub1[,c("total_cardspent", "creddebt","othdebt","carditems","card2items",
                         "wiremon","wireten","tollmon","tollten","equipmon","equipten","cars",
                         "agecat","gender","marital","retire","inccat","jobcat","empcat","edcat",
                         "spousedcat","region" ,"addresscat","carown","cartype","carcatvalue",
@@ -114,3 +115,20 @@ final_sub<-final_sub[,c("total_cardspent", "creddebt","othdebt","carditems","car
                         )]
 temp.cor<-cor(final_sub[,c(1:12)])
 corrplot(temp.cor,method = "color")
+#combining owndvd,owncd,ownvcr to ownavplayer
+final_sub$ownavplayer<-0
+temp_av<-final_sub[,c(35:37)]
+temp_av<-as.data.frame(apply(temp_av,2,as.numeric))
+temp_av$ownavplayer<-as.numeric(apply(temp_av,1,sum))
+str(temp_av)
+final_sub$ownavplayer<-temp_av$ownavplayer
+str(final_sub)
+
+#removing columns  to avoid multicollinearity
+
+final_sub<-final_sub[,c("total_cardspent", "creddebt","othdebt","carditems","card2items",
+                        "equipten","agecat","gender","marital","retire","inccat","edcat",
+                        "region" ,"carcatvalue","reason","churn","card","card2","cardtenurecat",
+                        "ownpda","ownavplayer"
+                      )]
+summary(lm(total_cardspent~.,data=final_sub))
