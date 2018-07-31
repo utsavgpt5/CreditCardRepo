@@ -132,3 +132,9 @@ final_sub<-final_sub[,c("total_cardspent", "creddebt","othdebt","carditems","car
                         "ownpda","ownavplayer"
                       )]
 summary(lm(total_cardspent~.,data=final_sub))
+
+###
+ggplot(data=final_sub[final_sub$reason %in% c("1","2","3","4"),],aes(x=card,fill=reason))+geom_bar()
+ggplot(data=final_sub[final_sub$reason %in% c("1","2","3","4"),],aes(x=reason,fill=card))+geom_bar()
+ggplot(data=final_sub,aes(x=reason,fill=card))+geom_bar()
+
